@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./Dockerfile
     plan: free
-    region: singapore
+    region: oregon
     autoDeploy: true
     healthCheckPath: /health.php
     envVars:
@@ -18,4 +18,4 @@ databases:
     user: lab11_user
     plan: 0.1c-256mb
     postgresMajorVersion: "18"
-    region: singapore
+    region: oregon
