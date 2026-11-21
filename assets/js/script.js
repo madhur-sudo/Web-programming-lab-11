@@ -32,7 +32,7 @@
   // 2. Login Form — Submit Spinner
   // -------------------------------------------------------------------------
 
-  const loginForm = document.getElementById('loginForm');
+  const loginForm = document.getElementById('loginForm') || document.getElementById('registerForm');
   const submitBtn = document.getElementById('submitBtn');
 
   if (loginForm && submitBtn) {

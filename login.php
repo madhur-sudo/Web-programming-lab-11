@@ -15,18 +15,26 @@ if (!empty($_SESSION['user_id'])) {
 $error      = '';
 $fieldError = [];
 $username   = '';
+$registrationSuccess = '';
+
+if (isset($_SESSION['registration_success'])) {
+    $registrationSuccess = (string) $_SESSION['registration_success'];
+    unset($_SESSION['registration_success']);
+}
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // --- CSRF verification ---
     $submittedCsrf = $_POST['csrf_token'] ?? '';
-    if (!verifyCsrf($submittedCsrf)) {
+    if (!is_string($submittedCsrf) || !verifyCsrf($submittedCsrf)) {
         $error = 'Invalid request. Please refresh and try again.';
     } else {
 
         // --- Sanitise inputs ---
-        $username = trim($_POST['username'] ?? '');
-        $password = $_POST['password'] ?? '';
+        $usernameInput = $_POST['username'] ?? '';
+        $passwordInput = $_POST['password'] ?? '';
+        $username = is_string($usernameInput) ? trim($usernameInput) : '';
+        $password = is_string($passwordInput) ? $passwordInput : '';
 
         // --- Server-side validation ---
         if ($username === '') {
@@ -164,6 +172,13 @@ include __DIR__ . '/includes/header.php';
                 </div>
             <?php endif; ?>
 
+            <?php if ($registrationSuccess !== ''): ?>
+                <div class="alert alert--success" role="status" aria-live="polite">
+                    <span class="alert__icon" aria-hidden="true">&#10003;</span>
+                    <?= htmlspecialchars($registrationSuccess, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') ?>
+                </div>
+            <?php endif; ?>
+
             <form
                 class="login-form"
                 method="POST"
@@ -257,6 +272,8 @@ include __DIR__ . '/includes/header.php';
                 </button>
 
             </form>
+
+            <p class="auth-switch">Don't have an account? <a href="register.php">Create one</a></p>
 
         </div><!-- /.login-panel__inner -->
     </main>
