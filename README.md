@@ -1,4 +1,4 @@
- Lab 11 — Database-Based User Login Validation
+ ACCESS — User Authentication
 
 A PHP application for database-based user authentication. A user submits a username and password; PHP checks the account in PostgreSQL and displays a protected page only when `password_verify()` accepts the stored password hash.
 

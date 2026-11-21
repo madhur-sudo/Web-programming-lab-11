@@ -1,4 +1,4 @@
-# Dockerfile — ACCESS: Lab 11 Authentication Portal
+# Dockerfile — ACCESS Authentication
 # PHP 8.3 with Apache and PostgreSQL PDO extension
 
 FROM php:8.3-apache

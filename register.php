@@ -94,7 +94,6 @@ include __DIR__ . '/includes/header.php';
 <div class="split-layout">
     <aside class="brand-panel" aria-label="Application branding">
         <div class="brand-panel__inner">
-            <div class="brand-panel__badge">LAB 11</div>
             <div class="brand-panel__logo" aria-hidden="true">
                 <div class="logo-icon">
                     <span class="logo-icon__ring"></span>
@@ -103,18 +102,7 @@ include __DIR__ . '/includes/header.php';
                 </div>
             </div>
             <h1 class="brand-panel__title">ACCESS</h1>
-            <p class="brand-panel__subtitle">AUTHENTICATION PORTAL</p>
-            <p class="brand-panel__tagline">Secure sign-in demonstration &middot; LAB 11</p>
-            <div class="brand-panel__divider" aria-hidden="true"></div>
-            <div class="brand-panel__description">
-                <p>A database-backed authentication system demonstrating secure credential validation using PHP&nbsp;8, PostgreSQL, and PDO prepared statements.</p>
-                <ul class="feature-list" aria-label="Security features">
-                    <li><span class="feature-list__icon" aria-hidden="true">&#10003;</span>bcrypt password hashing</li>
-                    <li><span class="feature-list__icon" aria-hidden="true">&#10003;</span>SQL injection prevention</li>
-                    <li><span class="feature-list__icon" aria-hidden="true">&#10003;</span>CSRF token protection</li>
-                    <li><span class="feature-list__icon" aria-hidden="true">&#10003;</span>Session-based authentication</li>
-                </ul>
-            </div>
+            <p class="brand-panel__tagline">A simple, clean authentication experience.</p>
             <div class="brand-panel__grid" aria-hidden="true">
                 <?php for ($i = 0; $i < 48; $i++): ?><span class="grid-dot"></span><?php endfor; ?>
             </div>
@@ -124,7 +112,6 @@ include __DIR__ . '/includes/header.php';
     <main class="login-panel" id="main-content">
         <div class="login-panel__inner">
             <header class="login-panel__header">
-                <span class="lab-badge">LAB 11</span>
                 <h2 class="login-panel__heading">Create account</h2>
                 <p class="login-panel__subtext">Choose a username and password</p>
             </header>

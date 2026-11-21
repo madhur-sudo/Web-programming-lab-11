@@ -1,5 +1,5 @@
 -- database/schema.sql
--- Lab 11 — Database-Based User Login Validation
+-- ACCESS — User Authentication
 -- PostgreSQL schema definition
 
 CREATE TABLE IF NOT EXISTS users (

@@ -1,4 +1,4 @@
-// script.js — Lab 11 | ACCESS Authentication Portal
+// script.js — ACCESS
 // Vanilla JS only. No frameworks.
 
 (function () {

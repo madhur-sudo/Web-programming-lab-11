@@ -17,8 +17,7 @@ try {
         echo json_encode([
             'status'   => 'ok',
             'database' => 'connected',
-            'app'      => 'ACCESS — Authentication Portal',
-            'lab'      => 'LAB 11',
+            'app'      => 'ACCESS',
         ]);
     } else {
         throw new RuntimeException('Database ping failed.');

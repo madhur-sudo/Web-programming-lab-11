@@ -26,9 +26,7 @@ if (!$user) {
 }
 $displayUsername = $user['username'];
 $username = htmlspecialchars($displayUsername, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$loginAt  = htmlspecialchars($_SESSION['login_at'] ?? 'Unknown');
-
-$pageTitle = 'Dashboard — ACCESS';
+$pageTitle = 'Welcome — ACCESS';
 $bodyClass = 'page-dashboard';
 include __DIR__ . '/includes/header.php';
 ?>
@@ -42,7 +40,6 @@ include __DIR__ . '/includes/header.php';
                 <span class="nav-logo__dot"></span>
             </div>
             <span class="dashboard-nav__title">ACCESS</span>
-            <span class="dashboard-nav__badge">LAB 11</span>
         </div>
         <div class="dashboard-nav__right">
             <span class="nav-user" aria-label="Logged in as <?= $username ?>">
@@ -74,12 +71,12 @@ include __DIR__ . '/includes/header.php';
                 </svg>
             </div>
             <div class="success-banner__text">
-                <span class="success-banner__status">Authentication Successful</span>
-                <span class="success-banner__detail">Session active &mdash; credentials verified against database</span>
+                <span class="success-banner__status">Signed in successfully</span>
+                <span class="success-banner__detail">Welcome back.</span>
             </div>
             <div class="success-banner__pill" aria-label="Status: Authenticated">
                 <span class="status-dot" aria-hidden="true"></span>
-                Authenticated
+                Active
             </div>
         </section>
 
@@ -94,69 +91,10 @@ include __DIR__ . '/includes/header.php';
                         <h1 class="welcome-card__heading">
                             Welcome, <span class="highlight"><?= $username ?></span>
                         </h1>
-                        <p class="welcome-card__sub">You have successfully signed in to the portal</p>
+                        <p class="welcome-card__sub">Your account is ready.</p>
                     </div>
                 </div>
 
-                <div class="session-info" aria-label="Session information">
-                    <div class="session-info__item">
-                        <span class="session-info__label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-                            </svg>
-                            Authenticated User
-                        </span>
-                        <span class="session-info__value"><?= $username ?></span>
-                    </div>
-                    <div class="session-info__item">
-                        <span class="session-info__label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-                            </svg>
-                            Login Time
-                        </span>
-                        <span class="session-info__value"><?= $loginAt ?></span>
-                    </div>
-                    <div class="session-info__item">
-                        <span class="session-info__label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                            </svg>
-                            Auth Method
-                        </span>
-                        <span class="session-info__value">Password · bcrypt</span>
-                    </div>
-                    <div class="session-info__item">
-                        <span class="session-info__label">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
-                            </svg>
-                            Backend
-                        </span>
-                        <span class="session-info__value">PHP 8 · PostgreSQL · PDO</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Lab info -->
-        <section class="lab-info" aria-label="Lab assignment details">
-            <div class="lab-info__card">
-                <h3 class="lab-info__title">Assignment Details</h3>
-                <p class="lab-info__text">
-                    <strong>LAB 11</strong> &mdash; Database-Based User Login Validation.<br>
-                    This application demonstrates secure user authentication against a PostgreSQL
-                    database using PHP PDO, bcrypt password hashing, prepared statements,
-                    CSRF protection, and PHP session management.
-                </p>
-                <div class="lab-info__tags">
-                    <span class="tag">PHP 8</span>
-                    <span class="tag">PostgreSQL</span>
-                    <span class="tag">PDO</span>
-                    <span class="tag">bcrypt</span>
-                    <span class="tag">CSRF</span>
-                    <span class="tag">Sessions</span>
-                </div>
             </div>
         </section>
 
