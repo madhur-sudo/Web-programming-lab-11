@@ -1,210 +1,144 @@
-# Lab 11 — Database-Based User Login Validation
+ Lab 11 — Database-Based User Login Validation
 
-> A database-backed authentication system using **PHP 8**, **PostgreSQL**, and **PDO**.
+A small PHP application for the Web Programming practical. A user submits a login name and password; PHP checks the account in PostgreSQL and displays a protected page only when `password_verify()` accepts the stored password hash.
 
----
+## Features
 
-## Project: ACCESS — Authentication Portal
+- PostgreSQL user lookup with PDO prepared statements
+- Password hashes created with `password_hash()` and verified with `password_verify()`
+- CSRF protection for login and logout requests
+- Session ID regeneration after successful authentication; HttpOnly and SameSite cookies
+- Responsive login and authenticated dashboard pages
+- Docker image with PHP 8.3, Apache, PDO_PGSQL, and database schema setup
+- Render Blueprint for the web service and a separate managed PostgreSQL database
 
-A complete, secure login validation web application demonstrating:
+There is intentionally no registration screen: this practical validates credentials already present in the database. Create a test account with the optional local seeder or insert a password hash yourself.
 
-- Password hashing with `password_hash()` / `password_verify()` (bcrypt)
-- SQL injection prevention with PDO prepared statements
-- CSRF token protection
-- PHP session management with session ID regeneration
-- Environment-variable-based database configuration
-- Split-screen responsive UI with dark navy + electric-blue design
+## Architecture
 
----
+`login.php` validates submitted fields, retrieves the matching username with a prepared query, verifies the hash, and creates an authenticated session. `dashboard.php` checks the session and reloads the account from PostgreSQL. `logout.php` accepts only a CSRF protected POST request and destroys the session. `health.php` reports application/database readiness without exposing connection details.
 
-## Demo Credentials
+## Project layout
 
-| Field    | Value          |
-|----------|----------------|
-| Username | `lab11student` |
-| Password | `Demo@12345`   |
-
----
-
-## Project Structure
-
-```
-lab11-login-validation/
-├── index.php              # Entry point (redirects to login)
-├── login.php              # Login page + POST handler
-├── dashboard.php          # Protected welcome/dashboard page
-├── logout.php             # Session destroy + redirect
-├── health.php             # Health-check endpoint (Render)
-│
-├── config/
-│   └── database.php       # PDO connection factory
-│
-├── includes/
-│   ├── session.php        # Session helpers, CSRF functions
-│   ├── header.php         # Shared HTML <head>
-│   └── footer.php         # Shared footer + script tag
-│
-├── database/
-│   └── schema.sql         # PostgreSQL table definition
-│
-├── scripts/
-│   └── seed_demo_user.php # Safe database seeder (no duplicates)
-│
-├── assets/
-│   ├── css/style.css      # Full custom CSS (no frameworks)
-│   └── js/script.js       # Vanilla JS (toggle, copy, spinner)
-│
-├── Dockerfile             # PHP 8.3 + Apache + pdo_pgsql
-├── docker-entrypoint.sh   # Seeds DB then starts Apache
-├── render.yaml            # Render deployment config
-├── .env.example           # Environment variable template
-├── .gitignore
-└── README.md
+```text
+config/       Environment loading and PDO connection factory
+database/     Idempotent PostgreSQL schema
+includes/     Session and shared page layout helpers
+scripts/      Schema setup and optional demo-user seeder
+assets/       CSS and vanilla JavaScript
+index.php     Redirects to the login page
+login.php     Login form and credential validation
+dashboard.php Authenticated page
+logout.php    CSRF-protected logout handler
+health.php    Database-aware health endpoint
+Dockerfile    PHP/Apache production image
+render.yaml   Render web service and managed PostgreSQL blueprint
 ```
 
----
+## PostgreSQL setup
 
-## Local Setup
+Create a database named `lab11_db`, then apply the schema:
 
-### Prerequisites
-
-- **PHP 8.x** with `pdo` and `pdo_pgsql` extensions
-- **PostgreSQL** (local or Neon)
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/<your-username>/lab11-login-validation.git
-cd lab11-login-validation
+```sh
+psql -U postgres -d lab11_db -f database/schema.sql
 ```
 
-### 2. Configure the environment
+The schema creates `users` with an integer primary key, unique username, password hash, and creation timestamp. It is safe to apply more than once. Do not store plaintext passwords in `password_hash`.
 
-```bash
-cp .env.example .env
-```
+### Configure environment
 
-Edit `.env` with your local PostgreSQL credentials:
+Copy `.env.example` to `.env` and set local PostgreSQL values. The application accepts either the individual `DB_*` variables or a PostgreSQL `DATABASE_URL` (which takes precedence). `.env` is ignored by Git; production credentials belong in the hosting provider's environment settings.
 
-```
+```text
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=lab11_db
 DB_USER=postgres
-DB_PASSWORD=your_password
+DB_PASSWORD=your_local_password
 DB_SSLMODE=prefer
 ```
 
-### 3. Create the database
+### Create a local test account
 
-Using psql:
+After setting `.env` and applying the schema, set a username and password for the one-time helper. It never prints the password or its hash:
 
-```sql
-CREATE DATABASE lab11_db;
-```
-
-### 4. Run the schema + seed
-
-```bash
+```sh
+# PowerShell
+$env:DEMO_USERNAME = "lab11student"
+$env:DEMO_PASSWORD = "choose-a-local-test-password"
 php scripts/seed_demo_user.php
 ```
 
-This creates the `users` table and inserts the demo user (safe to run multiple times — no duplicates).
-
-### 5. Start the development server
-
-```bash
-php -S localhost:8000
+```sh
+# macOS/Linux
+DEMO_USERNAME=lab11student DEMO_PASSWORD='choose-a-local-test-password' php scripts/seed_demo_user.php
 ```
 
-Open [http://localhost:8000](http://localhost:8000) in your browser.
+The helper skips an existing username and is not run automatically in production.
 
----
+## Run locally
 
-## Checking PHP PDO Extensions
+Requirements: PHP 8.3 (or compatible PHP 8.x) with `pdo` and `pdo_pgsql`, and PostgreSQL.
 
-```bash
-php -m | findstr pdo
+```sh
+php scripts/migrate.php
+php -S 127.0.0.1:8000
 ```
 
-You should see `pdo` and `pdo_pgsql` listed.
+Open <http://127.0.0.1:8000>. To log in, use an account already in the configured `users` table.
 
----
+## Docker
 
-## Security Features
+Build the image and run it with a reachable PostgreSQL server. The startup script retries schema setup, then starts Apache on port 10000. It does not seed a shared/default account.
 
-| Feature                  | Implementation                              |
-|--------------------------|---------------------------------------------|
-| Password storage         | `password_hash()` with bcrypt (cost 12)     |
-| Password verification    | `password_verify()`                         |
-| SQL injection prevention | PDO prepared statements with named params   |
-| CSRF protection          | Per-session CSRF token on login form        |
-| Session fixation         | `session_regenerate_id(true)` after login   |
-| Session security         | HttpOnly, SameSite=Strict session cookie    |
-| Output escaping          | `htmlspecialchars()` on all user output     |
-| Credential storage       | Environment variables only (no hardcoding)  |
-| Error messages           | Generic — does not reveal which field failed|
-
----
-
-## Test Cases
-
-| # | Action                              | Expected Result                |
-|---|-------------------------------------|-------------------------------|
-| 1 | Correct username + correct password | Dashboard / welcome page       |
-| 2 | Correct username + wrong password   | "Invalid username or password" |
-| 3 | Wrong username + wrong password     | "Invalid username or password" |
-| 4 | Empty fields submitted              | Field validation messages       |
-| 5 | SQL injection in username field     | Login rejected; DB unaffected  |
-| 6 | Direct access to dashboard.php      | Redirected to login page       |
-| 7 | Logout then browser back button     | Redirected to login page       |
-
----
-
-## Docker (Local)
-
-```bash
+```sh
 docker build -t lab11-login-validation .
-docker run -p 8080:80 \
-  -e DB_HOST=host.docker.internal \
-  -e DB_PORT=5432 \
-  -e DB_NAME=lab11_db \
-  -e DB_USER=postgres \
-  -e DB_PASSWORD=your_password \
-  -e DB_SSLMODE=prefer \
+docker run --rm -p 8080:10000 `
+  -e DB_HOST=host.docker.internal `
+  -e DB_PORT=5432 `
+  -e DB_NAME=lab11_db `
+  -e DB_USER=postgres `
+  -e DB_PASSWORD=your_local_password `
+  -e DB_SSLMODE=prefer `
   lab11-login-validation
 ```
 
-Open [http://localhost:8080](http://localhost:8080).
+For macOS/Linux, replace PowerShell backticks with `\` line continuations. Open <http://localhost:8080>.
 
----
+## Deploy to Render
 
-## Deployment (Render + Neon PostgreSQL)
+`render.yaml` defines one Docker web service and one separate Render Postgres database. The web service receives the managed database's private `DATABASE_URL`; registered users remain in the database across web service rebuilds and restarts. The database plan declared in the Blueprint is a paid persistent plan; check current Render pricing before provisioning.
 
-See [Section 10 of the assignment instructions] for the step-by-step deployment guide.
+1. Push this repository to GitHub and sign in to Render.
+2. In Render, choose **New → Blueprint**, connect `madhur-sudo/lab11-login-validation`, and select `main`.
+3. Review the Blueprint before applying it. It should show one web service and one PostgreSQL database. If Render detects existing resources with these names, verify that they are the intended resources before syncing.
+4. Apply the Blueprint and wait for both services to become available. Render supplies `DATABASE_URL` from the managed database; no database password goes in the repository.
+5. The container applies `database/schema.sql` on startup. Create the first user with a one-time SQL insert using a hash generated by PHP, for example:
 
-**Environment variables to set on Render:**
+   ```sh
+   php -r 'echo password_hash("choose-a-strong-test-password", PASSWORD_DEFAULT), PHP_EOL;'
+   ```
 
-| Variable     | Description                    |
-|--------------|--------------------------------|
-| `DB_HOST`    | Neon hostname                  |
-| `DB_PORT`    | `5432`                         |
-| `DB_NAME`    | Neon database name             |
-| `DB_USER`    | Neon username                  |
-| `DB_PASSWORD`| Neon password                  |
-| `DB_SSLMODE` | `require`                      |
+   Connect to the Render database using its dashboard/psql connection instructions and insert the returned hash:
 
-The `docker-entrypoint.sh` script automatically runs `seed_demo_user.php` on each deployment start (safe, no duplicates).
+   ```sql
+   INSERT INTO users (username, password_hash)
+   VALUES ('lab11student', '<paste-the-generated-hash>');
+   ```
 
----
+6. Visit the web service URL and log in with that username and the password used to create the hash. Confirm `/health.php` returns HTTP 200 with a connected database before considering the deployment live.
 
-## Technology Stack
+The `github-pages` deployment shown in the repository screenshot is not an application deployment: GitHub Pages serves static files and cannot execute PHP or connect this app to PostgreSQL. This checkout contains no `.github/workflows` deployment workflow, so the separate failed `main` status has no local workflow definition to diagnose. Inspect its GitHub Actions run log if a workflow was added outside this checkout; do not use Pages to host this app.
 
-- **PHP 8.3**
-- **PostgreSQL** (via Neon for production)
-- **PDO** — prepared statements
-- **HTML5 / CSS3 / Vanilla JS**
-- **Apache** (via Docker on Render)
+## Security notes
 
----
+- Password hashes only; no plaintext credential storage
+- Prepared SQL statements and generic invalid-login feedback
+- CSRF tokens on login and logout; login session ID rotated after success
+- Authenticated dashboard reads the user's current row from PostgreSQL
+- User visible output is HTML-escaped
+- Database configuration comes from environment variables; connection errors are logged server-side and a generic message is shown to users
 
+## Verification checklist
+
+Test correct credentials, wrong password, unknown username, empty fields, direct unauthenticated dashboard access, logout, and dashboard access after logout. Confirm schema setup against a fresh PostgreSQL database. The application has no automated integration test suite; hosting-specific checks require a real Render service and managed database.

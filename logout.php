@@ -5,6 +5,12 @@ require_once __DIR__ . '/includes/session.php';
 
 initSession();
 
+if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !verifyCsrf((string)($_POST['csrf_token'] ?? ''))) {
+    http_response_code(405);
+    header('Allow: POST');
+    exit('Invalid logout request.');
+}
+
 // Unset all session variables
 $_SESSION = [];
 

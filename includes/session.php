@@ -10,7 +10,7 @@ function initSession(): void
         session_set_cookie_params([
             'lifetime' => 0,
             'path'     => '/',
-            'secure'   => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'secure'   => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https'),
             'httponly' => true,
             'samesite' => 'Strict',
         ]);
@@ -23,7 +23,7 @@ function requireAuth(): void
 {
     initSession();
     if (empty($_SESSION['user_id']) || empty($_SESSION['username'])) {
-        header('Location: index.php');
+        header('Location: login.php');
         exit;
     }
 }

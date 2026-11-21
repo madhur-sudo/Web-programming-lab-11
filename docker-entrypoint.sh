@@ -4,16 +4,16 @@
 
 set -e
 
-echo "[Entrypoint] Running database schema and seeder..."
+echo "[Entrypoint] Applying database schema..."
 
 # Wait for the database to be ready (simple retry loop)
 MAX_RETRIES=30
 RETRY=0
-until php /var/www/html/scripts/seed_demo_user.php; do
+until php /var/www/html/scripts/migrate.php; do
   RETRY=$((RETRY+1))
   if [ "$RETRY" -ge "$MAX_RETRIES" ]; then
-    echo "[Entrypoint] WARNING: Could not seed database after ${MAX_RETRIES} attempts. Continuing anyway."
-    break
+    echo "[Entrypoint] Database schema could not be applied. Exiting."
+    exit 1
   fi
   echo "[Entrypoint] Database not ready, retrying in 2s... (${RETRY}/${MAX_RETRIES})"
   sleep 2

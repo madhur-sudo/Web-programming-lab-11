@@ -46,7 +46,7 @@
   }
 
   // -------------------------------------------------------------------------
-  // 3. Copy-to-Clipboard Buttons (Demo Credentials)
+  // 3. Copy-to-Clipboard Buttons (when present)
   // -------------------------------------------------------------------------
 
   document.querySelectorAll('.copy-btn').forEach(function (btn) {
@@ -84,7 +84,6 @@
   const logoutBtn = document.getElementById('logoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', function (e) {
-      // We use a simple confirm; replace with a custom modal if desired.
       if (!window.confirm('Are you sure you want to sign out?')) {
         e.preventDefault();
       }
@@ -100,7 +99,7 @@
     // Replace history state so back button cannot re-enter without server check
     history.replaceState(null, '', window.location.href);
     window.addEventListener('popstate', function () {
-      window.location.replace('logout.php');
+      window.location.replace('login.php');
     });
   }
 

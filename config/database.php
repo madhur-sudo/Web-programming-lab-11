@@ -2,15 +2,30 @@
 // config/database.php
 // Database configuration loaded from environment variables only.
 // Never hardcode credentials here.
+require_once __DIR__ . '/environment.php';
 
 function getDatabaseConnection(): PDO
 {
-    $host     = getenv('DB_HOST')     ?: $_ENV['DB_HOST']     ?? 'localhost';
-    $port     = getenv('DB_PORT')     ?: $_ENV['DB_PORT']     ?? '5432';
-    $dbname   = getenv('DB_NAME')     ?: $_ENV['DB_NAME']     ?? 'lab11_db';
-    $user     = getenv('DB_USER')     ?: $_ENV['DB_USER']     ?? 'postgres';
-    $password = getenv('DB_PASSWORD') ?: $_ENV['DB_PASSWORD'] ?? '';
-    $sslmode  = getenv('DB_SSLMODE') ?: $_ENV['DB_SSLMODE']  ?? 'prefer';
+    $databaseUrl = getenv('DATABASE_URL');
+    if ($databaseUrl) {
+        $parts = parse_url($databaseUrl);
+        if ($parts === false || empty($parts['host']) || empty($parts['path'])) {
+            throw new RuntimeException('DATABASE_URL is invalid.');
+        }
+        $host = $parts['host'];
+        $port = $parts['port'] ?? 5432;
+        $dbname = rawurldecode(ltrim($parts['path'], '/'));
+        $user = rawurldecode($parts['user'] ?? '');
+        $password = rawurldecode($parts['pass'] ?? '');
+        $sslmode = getenv('DB_SSLMODE') ?: 'require';
+    } else {
+        $host     = getenv('DB_HOST') ?: 'localhost';
+        $port     = getenv('DB_PORT') ?: '5432';
+        $dbname   = getenv('DB_NAME') ?: 'lab11_db';
+        $user     = getenv('DB_USER') ?: 'postgres';
+        $password = getenv('DB_PASSWORD') ?: '';
+        $sslmode  = getenv('DB_SSLMODE') ?: 'prefer';
+    }
 
     $dsn = "pgsql:host={$host};port={$port};dbname={$dbname};sslmode={$sslmode}";
 

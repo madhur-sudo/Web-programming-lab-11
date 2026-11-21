@@ -4,23 +4,6 @@
 require_once __DIR__ . '/includes/session.php';
 require_once __DIR__ . '/config/database.php';
 
-// Load .env for local development
-$envFile = __DIR__ . '/.env';
-if (file_exists($envFile)) {
-    $lines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    foreach ($lines as $line) {
-        if (strpos(trim($line), '#') === 0) continue;
-        if (strpos($line, '=') === false) continue;
-        [$key, $value] = explode('=', $line, 2);
-        $key = trim($key);
-        $value = trim($value);
-        if (!getenv($key)) {
-            putenv("{$key}={$value}");
-            $_ENV[$key] = $value;
-        }
-    }
-}
-
 initSession();
 
 // If already logged in, go to dashboard
@@ -78,6 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         // Rotate CSRF token after login
                         $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 
+                        if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT)) {
+                            $rehash = $pdo->prepare('UPDATE users SET password_hash = :hash WHERE id = :id');
+                            $rehash->execute([':hash' => password_hash($password, PASSWORD_DEFAULT), ':id' => $user['id']]);
+                        }
+
                         header('Location: dashboard.php');
                         exit;
                     } else {
@@ -87,7 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         usleep(300000);
                     }
 
-                } catch (RuntimeException $e) {
+                } catch (Throwable $e) {
                     $error = 'A server error occurred. Please try again later.';
                     error_log($e->getMessage());
                 }
@@ -205,6 +193,7 @@ include __DIR__ . '/includes/header.php';
                             placeholder="Enter your username"
                             autocomplete="username"
                             maxlength="100"
+                            required
                             aria-required="true"
                             aria-describedby="<?= isset($fieldError['username']) ? 'username-error' : '' ?>"
                         >
@@ -234,6 +223,7 @@ include __DIR__ . '/includes/header.php';
                             placeholder="Enter your password"
                             autocomplete="current-password"
                             maxlength="255"
+                            required
                             aria-required="true"
                             aria-describedby="<?= isset($fieldError['password']) ? 'password-error' : '' ?>"
                         >
@@ -267,36 +257,6 @@ include __DIR__ . '/includes/header.php';
                 </button>
 
             </form>
-
-            <!-- Demo Credentials -->
-            <details class="demo-creds" id="demoCreds">
-                <summary class="demo-creds__summary">
-                    <span class="demo-creds__icon" aria-hidden="true">&#128274;</span>
-                    Demo Credentials
-                    <span class="demo-creds__arrow" aria-hidden="true">&#8250;</span>
-                </summary>
-                <div class="demo-creds__body">
-                    <p class="demo-creds__note">For lab evaluation only</p>
-                    <div class="demo-creds__row">
-                        <span class="demo-creds__label">Username</span>
-                        <code class="demo-creds__value" id="demoUsername">lab11student</code>
-                        <button type="button" class="copy-btn" data-copy="lab11student" aria-label="Copy username">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="demo-creds__row">
-                        <span class="demo-creds__label">Password</span>
-                        <code class="demo-creds__value">Demo@12345</code>
-                        <button type="button" class="copy-btn" data-copy="Demo@12345" aria-label="Copy password">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </details>
 
         </div><!-- /.login-panel__inner -->
     </main>

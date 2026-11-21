@@ -798,6 +798,8 @@ details[open] .demo-creds__arrow {
   gap: var(--space-4);
 }
 
+#logoutForm { margin: 0; }
+
 /* Nav user display */
 .nav-user {
   display: flex;
