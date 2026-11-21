@@ -1,6 +1,5 @@
 # Lab 11 — Database-Based User Login Validation
 
-> ** Web Programming Lab Assignment**
 > A database-backed authentication system using **PHP 8**, **PostgreSQL**, and **PDO**.
 
 ---
