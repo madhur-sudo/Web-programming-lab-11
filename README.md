@@ -1,6 +1,6 @@
 # Lab 11 — Database-Based User Login Validation
 
-> **BTech CSE Web Programming Lab Assignment**
+> ** Web Programming Lab Assignment**
 > A database-backed authentication system using **PHP 8**, **PostgreSQL**, and **PDO**.
 
 ---
@@ -209,4 +209,3 @@ The `docker-entrypoint.sh` script automatically runs `seed_demo_user.php` on eac
 
 ---
 
-*Lab 11 — BTech CSE Web Programming*
